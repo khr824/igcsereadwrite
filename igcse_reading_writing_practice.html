@@ -1,0 +1,883 @@
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink: #1a1410;
+    --ink2: #4a3f35;
+    --ink3: #8a7a6e;
+    --paper: #faf8f4;
+    --cream: #f2ede4;
+    --rule: #e0d8cc;
+    --gold: #c9a84c;
+    --gold-light: #f5edda;
+    --red-mark: #c0392b;
+    --green-mark: #27ae60;
+    --blue-ink: #2c5f8a;
+  }
+
+  body { font-family: 'DM Sans', sans-serif; background: var(--paper); color: var(--ink); min-height: 100vh; }
+
+  .exam-header {
+    background: var(--ink);
+    color: #fff;
+    padding: 20px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 4px solid var(--gold);
+  }
+
+  .exam-title { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 600; letter-spacing: 0.02em; }
+  .exam-subtitle { font-size: 12px; color: rgba(255,255,255,0.55); margin-top: 2px; letter-spacing: 0.08em; text-transform: uppercase; }
+
+  .timer-box {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 8px;
+    padding: 10px 18px;
+    text-align: center;
+    min-width: 140px;
+  }
+  .timer-label { font-size: 10px; color: rgba(255,255,255,0.45); text-transform: uppercase; letter-spacing: 0.1em; }
+  .timer-value { font-family: 'Playfair Display', serif; font-size: 28px; color: #fff; letter-spacing: 0.05em; line-height: 1.1; }
+  .timer-value.warning { color: #f39c12; }
+  .timer-value.danger { color: #e74c3c; }
+
+  .score-badge {
+    background: var(--gold-light);
+    border: 1px solid var(--gold);
+    border-radius: 8px;
+    padding: 10px 18px;
+    text-align: center;
+    min-width: 110px;
+  }
+  .score-label { font-size: 10px; color: var(--ink3); text-transform: uppercase; letter-spacing: 0.1em; }
+  .score-value { font-family: 'Playfair Display', serif; font-size: 26px; color: var(--ink); }
+
+  .nav-bar {
+    display: flex;
+    gap: 0;
+    background: var(--cream);
+    border-bottom: 1px solid var(--rule);
+    padding: 0 32px;
+    overflow-x: auto;
+  }
+
+  .nav-btn {
+    padding: 14px 22px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--ink3);
+    border-bottom: 3px solid transparent;
+    white-space: nowrap;
+    transition: all 0.2s;
+  }
+  .nav-btn:hover { color: var(--ink); }
+  .nav-btn.active { color: var(--ink); border-bottom-color: var(--gold); font-weight: 500; }
+  .nav-btn.done { color: var(--green-mark); }
+  .nav-btn.done::after { content: ' ✓'; }
+
+  .main { max-width: 860px; margin: 0 auto; padding: 32px 24px; }
+
+  .section-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--gold-light);
+    border: 1px solid var(--gold);
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-size: 11px;
+    font-weight: 500;
+    color: #7a5c1e;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 20px;
+  }
+
+  .exercise-card {
+    background: #fff;
+    border: 1px solid var(--rule);
+    border-radius: 12px;
+    padding: 28px 32px;
+    margin-bottom: 24px;
+    position: relative;
+  }
+
+  .exercise-number {
+    position: absolute;
+    top: -14px;
+    left: 24px;
+    background: var(--ink);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 4px 12px;
+    border-radius: 10px;
+    letter-spacing: 0.05em;
+  }
+
+  .marks-tag {
+    position: absolute;
+    top: 20px;
+    right: 24px;
+    background: var(--cream);
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 11px;
+    color: var(--ink3);
+  }
+
+  .passage-box {
+    background: var(--paper);
+    border-left: 4px solid var(--gold);
+    border-radius: 0 8px 8px 0;
+    padding: 20px 24px;
+    margin-bottom: 22px;
+    font-size: 14.5px;
+    line-height: 1.85;
+    color: var(--ink2);
+    font-style: italic;
+  }
+
+  .passage-title {
+    font-family: 'Playfair Display', serif;
+    font-style: normal;
+    font-size: 15px;
+    color: var(--ink);
+    margin-bottom: 10px;
+    font-weight: 600;
+  }
+
+  .question-text {
+    font-size: 14.5px;
+    line-height: 1.7;
+    color: var(--ink);
+    margin-bottom: 16px;
+    font-weight: 500;
+  }
+
+  .answer-textarea {
+    width: 100%;
+    min-height: 110px;
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--ink);
+    background: var(--paper);
+    resize: vertical;
+    outline: none;
+    transition: border-color 0.2s;
+    line-height: 1.65;
+  }
+  .answer-textarea:focus { border-color: var(--gold); background: #fff; }
+
+  .mcq-options { display: flex; flex-direction: column; gap: 10px; }
+  .mcq-option {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 16px;
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.18s;
+    background: var(--paper);
+  }
+  .mcq-option:hover { border-color: var(--gold); background: var(--gold-light); }
+  .mcq-option.selected { border-color: var(--blue-ink); background: #eef4fb; }
+  .mcq-option.correct { border-color: var(--green-mark); background: #eafaf1; }
+  .mcq-option.wrong { border-color: var(--red-mark); background: #fdedeb; }
+  .option-letter {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--cream);
+    border: 1px solid var(--rule);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 500;
+    flex-shrink: 0;
+    color: var(--ink2);
+  }
+  .mcq-option.selected .option-letter { background: var(--blue-ink); color: #fff; border-color: var(--blue-ink); }
+  .mcq-option.correct .option-letter { background: var(--green-mark); color: #fff; border-color: var(--green-mark); }
+  .mcq-option.wrong .option-letter { background: var(--red-mark); color: #fff; border-color: var(--red-mark); }
+  .option-text { font-size: 14px; line-height: 1.55; color: var(--ink2); padding-top: 2px; }
+
+  .submit-btn {
+    background: var(--ink);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 26px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    margin-top: 16px;
+    transition: background 0.2s;
+  }
+  .submit-btn:hover { background: #2d2218; }
+  .submit-btn:disabled { background: var(--ink3); cursor: default; }
+
+  .feedback-inline {
+    margin-top: 14px;
+    padding: 14px 18px;
+    border-radius: 8px;
+    font-size: 13.5px;
+    line-height: 1.6;
+    display: none;
+  }
+  .feedback-inline.show { display: block; }
+  .feedback-inline.correct { background: #eafaf1; border: 1px solid #a9dfbf; color: #1e8449; }
+  .feedback-inline.partial { background: #fef9e7; border: 1px solid #f9ca6e; color: #7d6608; }
+  .feedback-inline.incorrect { background: #fdedeb; border: 1px solid #f5b7b1; color: #922b21; }
+
+  .fb-title { font-weight: 500; margin-bottom: 5px; }
+
+  .bottom-bar {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-top: 32px;
+    padding-top: 24px;
+    border-top: 1px solid var(--rule);
+    flex-wrap: wrap;
+  }
+
+  .action-btn {
+    padding: 11px 22px;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1px solid var(--rule);
+    background: #fff;
+    color: var(--ink);
+    transition: all 0.18s;
+  }
+  .action-btn:hover { background: var(--cream); }
+  .action-btn.primary { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .action-btn.primary:hover { background: #2d2218; }
+  .action-btn.danger { background: #fff; color: var(--red-mark); border-color: #f5b7b1; }
+  .action-btn.danger:hover { background: #fdedeb; }
+
+  .final-report {
+    background: #fff;
+    border: 1px solid var(--rule);
+    border-radius: 12px;
+    padding: 32px;
+    display: none;
+  }
+  .final-report.show { display: block; }
+
+  .report-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 26px;
+    color: var(--ink);
+    margin-bottom: 6px;
+  }
+  .report-sub { color: var(--ink3); font-size: 14px; margin-bottom: 28px; }
+
+  .score-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 28px; }
+  .score-cell {
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: 10px;
+    padding: 18px;
+    text-align: center;
+  }
+  .score-cell .num { font-family: 'Playfair Display', serif; font-size: 32px; color: var(--ink); }
+  .score-cell .lbl { font-size: 11px; color: var(--ink3); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 4px; }
+  .score-cell.highlight { background: var(--gold-light); border-color: var(--gold); }
+
+  .tip-list { list-style: none; }
+  .tip-list li {
+    padding: 12px 0;
+    border-bottom: 1px solid var(--rule);
+    font-size: 14px;
+    color: var(--ink2);
+    line-height: 1.6;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .tip-list li:last-child { border-bottom: none; }
+  .tip-dot {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--gold-light);
+    border: 1px solid var(--gold);
+    flex-shrink: 0;
+    margin-top: 2px;
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #7a5c1e;
+    font-weight: 500;
+  }
+
+  .progress-bar-wrap { background: var(--cream); border-radius: 4px; height: 6px; width: 100%; margin: 16px 0 8px; overflow: hidden; }
+  .progress-bar-fill { height: 6px; border-radius: 4px; background: var(--gold); transition: width 0.4s; }
+
+  .section-panel { display: none; }
+  .section-panel.active { display: block; }
+
+  .hint-btn {
+    background: none;
+    border: 1px dashed var(--rule);
+    border-radius: 6px;
+    padding: 5px 12px;
+    font-size: 12px;
+    color: var(--ink3);
+    cursor: pointer;
+    margin-top: 8px;
+    transition: all 0.18s;
+  }
+  .hint-btn:hover { border-color: var(--gold); color: var(--ink2); }
+
+  .hint-box {
+    display: none;
+    margin-top: 10px;
+    padding: 10px 14px;
+    background: var(--cream);
+    border-radius: 6px;
+    font-size: 13px;
+    color: var(--ink2);
+    border-left: 3px solid var(--gold);
+  }
+  .hint-box.show { display: block; }
+</style>
+
+<h2 class="sr-only">IGCSE English Language Reading and Writing Practice Exam</h2>
+
+<div class="exam-header">
+  <div>
+    <div class="exam-title">IGCSE English Language</div>
+    <div class="exam-subtitle">Reading &amp; Writing Practice · Cambridge Assessment</div>
+  </div>
+  <div style="display:flex;gap:12px;align-items:center;">
+    <div class="score-badge">
+      <div class="score-label">Score</div>
+      <div class="score-value" id="live-score">0 / 0</div>
+    </div>
+    <div class="timer-box">
+      <div class="timer-label">Time remaining</div>
+      <div class="timer-value" id="timer-display">1:30:00</div>
+    </div>
+  </div>
+</div>
+
+<div class="nav-bar">
+  <button class="nav-btn active" onclick="showSection(0,this)" id="tab0">Reading 1</button>
+  <button class="nav-btn" onclick="showSection(1,this)" id="tab1">Reading 2</button>
+  <button class="nav-btn" onclick="showSection(2,this)" id="tab2">Reading 3</button>
+  <button class="nav-btn" onclick="showSection(3,this)" id="tab3">Writing 1</button>
+  <button class="nav-btn" onclick="showSection(4,this)" id="tab4">Writing 2</button>
+  <button class="nav-btn" onclick="showSection(5,this)" id="tab5">Writing 3</button>
+  <button class="nav-btn" onclick="showSection(6,this)" id="tab6">Results</button>
+</div>
+
+<div class="main">
+  <div id="progress-wrap">
+    <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--ink3);">
+      <span>Progress</span>
+      <span id="prog-label">0 of 6 completed</span>
+    </div>
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="prog-bar" style="width:0%"></div></div>
+  </div>
+
+  <!-- READING 1 -->
+  <div class="section-panel active" id="sec0">
+    <div class="section-badge">Reading Exercise 1 · Comprehension</div>
+    <div class="exercise-card">
+      <div class="exercise-number">Exercise 1</div>
+      <div class="marks-tag">[15 marks]</div>
+      <div class="passage-box">
+        <div class="passage-title">The Last Library</div>
+        The old lending library on Crane Street had survived two world wars, a fire, and four floods. Mrs Hartley, the librarian of thirty-two years, had watched the neighbourhood transform around her: the bakery become a coffee chain, the cinema become a car park, the post office close entirely. But the library had endured, its oak doors opening each morning at nine precisely, its shelves sagging pleasantly under the weight of accumulated knowledge. On the last Tuesday of March, however, a letter arrived from the council. "Due to budgetary constraints," it read, "Library services at Crane Street will cease on 30 April." Mrs Hartley folded the letter carefully, placed it under her desk, and began planning the resistance.
+      </div>
+
+      <div class="question-text">1(a) What does the phrase "sagging pleasantly" suggest about the library's shelves? Give two ideas. <span style="color:var(--ink3);font-weight:400;font-size:13px;">[2]</span></div>
+      <textarea class="answer-textarea" id="r1q1" placeholder="Write your answer here..."></textarea>
+      <button class="hint-btn" onclick="toggleHint('h1')">Show hint</button>
+      <div class="hint-box" id="h1">Think about what physically causes shelves to sag AND what this implies about the library's history/collection.</div>
+      <div class="feedback-inline" id="fb-r1q1"></div>
+
+      <div class="question-text" style="margin-top:22px;">1(b) How does the writer use contrast to show the changes in the neighbourhood? Refer to specific details. <span style="color:var(--ink3);font-weight:400;font-size:13px;">[4]</span></div>
+      <textarea class="answer-textarea" id="r1q2" placeholder="Write your answer here..."></textarea>
+      <div class="feedback-inline" id="fb-r1q2"></div>
+
+      <div class="question-text" style="margin-top:22px;">1(c) What does Mrs Hartley's reaction to the letter reveal about her character? Use evidence from the text. <span style="color:var(--ink3);font-weight:400;font-size:13px;">[4]</span></div>
+      <textarea class="answer-textarea" id="r1q3" placeholder="Write your answer here..."></textarea>
+      <div class="feedback-inline" id="fb-r1q3"></div>
+
+      <div class="question-text" style="margin-top:22px;">1(d) Which word best describes the tone of the final sentence?</div>
+      <div class="mcq-options" id="mcq-r1q4">
+        <div class="mcq-option" onclick="selectMCQ('r1q4','A',this)"><div class="option-letter">A</div><div class="option-text">Despairing — Mrs Hartley has given up hope for the library's survival.</div></div>
+        <div class="mcq-option" onclick="selectMCQ('r1q4','B',this)"><div class="option-letter">B</div><div class="option-text">Resolute — Mrs Hartley is determined to fight back against the closure.</div></div>
+        <div class="mcq-option" onclick="selectMCQ('r1q4','C',this)"><div class="option-letter">C</div><div class="option-text">Indifferent — Mrs Hartley does not care about the letter's contents.</div></div>
+        <div class="mcq-option" onclick="selectMCQ('r1q4','D',this)"><div class="option-letter">D</div><div class="option-text">Confused — Mrs Hartley does not understand what has happened.</div></div>
+      </div>
+      <div class="feedback-inline" id="fb-r1q4"></div>
+
+      <button class="submit-btn" onclick="markReading1()">Submit Reading 1</button>
+    </div>
+  </div>
+
+  <!-- READING 2 -->
+  <div class="section-panel" id="sec1">
+    <div class="section-badge">Reading Exercise 2 · Inference &amp; Language</div>
+    <div class="exercise-card">
+      <div class="exercise-number">Exercise 2</div>
+      <div class="marks-tag">[12 marks]</div>
+      <div class="passage-box">
+        <div class="passage-title">Summit Fever</div>
+        At 7,000 metres, rational thought begins to dissolve. Climbers call it "summit fever" — that peculiar madness that compels exhausted, oxygen-deprived mountaineers to push upward when every sensible instinct screams retreat. The mountain does not forgive mistakes at this altitude. Frostbite claims fingers within minutes; cerebral oedema can render a climber unconscious in hours. Yet season after season, the queues grow longer. Expedition leaders speak grimly of "traffic jams" on the death zone routes, of clients whose corporate sponsorship has outpaced their technical skill, of Sherpa guides carrying both the equipment and, increasingly, the responsibility for other people's ambitions. The summit photograph, it seems, has become more valuable than the summit itself.
+      </div>
+
+      <div class="question-text">2(a) What does the writer mean by "rational thought begins to dissolve"? <span style="color:var(--ink3);font-weight:400;font-size:13px;">[2]</span></div>
+      <textarea class="answer-textarea" id="r2q1" placeholder="Write your answer here..."></textarea>
+      <div class="feedback-inline" id="fb-r2q1"></div>
+
+      <div class="question-text" style="margin-top:22px;">2(b) Select the option that best explains the writer's use of the phrase "traffic jams on the death zone routes": <span style="color:var(--ink3);font-weight:400;font-size:13px;">[2]</span></div>
+      <div class="mcq-options" id="mcq-r2q2">
+        <div class="mcq-option" onclick="selectMCQ('r2q2','A',this)"><div class="option-letter">A</div><div class="option-text">It compares crowded climbing routes to urban congestion, making a dangerous situation seem absurdly mundane.</div></div>
+        <div class="mcq-option" onclick="selectMCQ('r2q2','B',this)"><div class="option-letter">B</div><div class="option-text">It shows that the mountain has been urbanised and now has actual roads.</div></div>
+        <div class="mcq-option" onclick="selectMCQ('r2q2','C',this)"><div class="option-letter">C</div><div class="option-text">It emphasises that expedition leaders are angry at other climbers.</div></div>
+        <div class="mcq-option" onclick="selectMCQ('r2q2','D',this)"><div class="option-letter">D</div><div class="option-text">It suggests that mountain climbing has become a sport for anyone to try.</div></div>
+      </div>
+      <div class="feedback-inline" id="fb-r2q2"></div>
+
+      <div class="question-text" style="margin-top:22px;">2(c) How does the writer criticise modern mountaineering culture? Write about the methods the writer uses. <span style="color:var(--ink3);font-weight:400;font-size:13px;">[4]</span></div>
+      <textarea class="answer-textarea" id="r2q3" placeholder="Write your answer here..."></textarea>
+      <div class="feedback-inline" id="fb-r2q3"></div>
+
+      <div class="question-text" style="margin-top:22px;">2(d) What is the effect of the final sentence: "The summit photograph, it seems, has become more valuable than the summit itself"? <span style="color:var(--ink3);font-weight:400;font-size:13px;">[4]</span></div>
+      <textarea class="answer-textarea" id="r2q4" placeholder="Write your answer here..."></textarea>
+      <button class="hint-btn" onclick="toggleHint('h2')">Show hint</button>
+      <div class="hint-box" id="h2">Consider the irony, what it implies about motivation, and the word "seems" — does it introduce doubt?</div>
+      <div class="feedback-inline" id="fb-r2q4"></div>
+
+      <button class="submit-btn" onclick="markReading2()">Submit Reading 2</button>
+    </div>
+  </div>
+
+  <!-- READING 3 -->
+  <div class="section-panel" id="sec2">
+    <div class="section-badge">Reading Exercise 3 · Summary Writing</div>
+    <div class="exercise-card">
+      <div class="exercise-number">Exercise 3</div>
+      <div class="marks-tag">[10 marks]</div>
+      <div class="passage-box">
+        <div class="passage-title">The Hidden Costs of Fast Fashion</div>
+        Each year, the global fashion industry produces 100 billion garments — approximately 14 items for every person on the planet. The majority of these will be discarded within a year. The environmental toll is staggering: the industry accounts for 10% of global carbon emissions, more than aviation and shipping combined. Cotton farming for a single T-shirt requires 2,700 litres of water. Synthetic fabrics shed microplastics with every wash; these particles have now been detected in Arctic ice, deep ocean sediments, and human blood. Workers in producing countries often receive wages below subsistence level and face dangerous working conditions. In Bangladesh, Cambodia, and Vietnam, garment workers — predominantly young women — routinely work 14-hour shifts for monthly wages that would not cover a week's rent in the countries where their products are sold. Yet consumer demand shows no sign of slowing.
+      </div>
+
+      <div class="question-text">3(a) Using your own words as far as possible, write a summary of the environmental problems caused by the fashion industry. Write 80–100 words. <span style="color:var(--ink3);font-weight:400;font-size:13px;">[5]</span></div>
+      <textarea class="answer-textarea" id="r3q1" style="min-height:140px;" placeholder="Write your summary here (80–100 words)..."></textarea>
+      <div id="wordcount1" style="font-size:12px;color:var(--ink3);margin-top:6px;">Word count: 0</div>
+      <div class="feedback-inline" id="fb-r3q1"></div>
+
+      <div class="question-text" style="margin-top:22px;">3(b) Which two statements are supported by the passage? <span style="color:var(--ink3);font-weight:400;font-size:13px;">[2]</span></div>
+      <div class="mcq-options" id="mcq-r3q2">
+        <div class="mcq-option" onclick="toggleCheck('r3q2','A',this)" id="r3q2A"><div class="option-letter">A</div><div class="option-text">The fashion industry produces more carbon emissions than aviation and shipping together.</div></div>
+        <div class="mcq-option" onclick="toggleCheck('r3q2','B',this)" id="r3q2B"><div class="option-letter">B</div><div class="option-text">Microplastics from clothing have been found in remote environments and the human body.</div></div>
+        <div class="mcq-option" onclick="toggleCheck('r3q2','C',this)" id="r3q2C"><div class="option-letter">C</div><div class="option-text">Governments have introduced laws to ban fast fashion in most countries.</div></div>
+        <div class="mcq-option" onclick="toggleCheck('r3q2','D',this)" id="r3q2D"><div class="option-letter">D</div><div class="option-text">Cotton farming requires very little water compared to synthetic materials.</div></div>
+      </div>
+      <div class="feedback-inline" id="fb-r3q2"></div>
+
+      <div class="question-text" style="margin-top:22px;">3(c) Explain what the phrase "wages below subsistence level" tells us about the workers' situation. <span style="color:var(--ink3);font-weight:400;font-size:13px;">[3]</span></div>
+      <textarea class="answer-textarea" id="r3q3" placeholder="Write your answer here..."></textarea>
+      <div class="feedback-inline" id="fb-r3q3"></div>
+
+      <button class="submit-btn" onclick="markReading3()">Submit Reading 3</button>
+    </div>
+  </div>
+
+  <!-- WRITING 1 -->
+  <div class="section-panel" id="sec3">
+    <div class="section-badge">Writing Exercise 1 · Descriptive Writing</div>
+    <div class="exercise-card">
+      <div class="exercise-number">Exercise 4</div>
+      <div class="marks-tag">[20 marks]</div>
+      <div class="passage-box" style="border-left-color:var(--blue-ink);">
+        <strong style="font-style:normal;color:var(--ink);">Task:</strong> Write a descriptive piece about a place that has changed significantly over time. You might write about a building, a street, a landscape, or a town. Your writing should convey a strong sense of atmosphere.
+      </div>
+      <div style="font-size:13px;color:var(--ink3);margin-bottom:14px;">Aim for 350–450 words. Focus on: vivid language, structure, sensory detail, and precise vocabulary.</div>
+      <textarea class="answer-textarea" id="w1" style="min-height:220px;" placeholder="Begin your descriptive writing here..."></textarea>
+      <div id="wordcount2" style="font-size:12px;color:var(--ink3);margin-top:6px;">Word count: 0</div>
+
+      <div class="question-text" style="margin-top:20px;">Which techniques have you used? (select all that apply)</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;" id="w1-techniques">
+        <div class="mcq-option" style="padding:8px 14px;" onclick="toggleTech(this)"><div class="option-text" style="padding:0;">Simile / metaphor</div></div>
+        <div class="mcq-option" style="padding:8px 14px;" onclick="toggleTech(this)"><div class="option-text" style="padding:0;">Sensory detail</div></div>
+        <div class="mcq-option" style="padding:8px 14px;" onclick="toggleTech(this)"><div class="option-text" style="padding:0;">Varied sentence structure</div></div>
+        <div class="mcq-option" style="padding:8px 14px;" onclick="toggleTech(this)"><div class="option-text" style="padding:0;">Personification</div></div>
+        <div class="mcq-option" style="padding:8px 14px;" onclick="toggleTech(this)"><div class="option-text" style="padding:0;">Contrast / juxtaposition</div></div>
+        <div class="mcq-option" style="padding:8px 14px;" onclick="toggleTech(this)"><div class="option-text" style="padding:0;">Specific vocabulary</div></div>
+      </div>
+
+      <div class="feedback-inline" id="fb-w1"></div>
+      <button class="submit-btn" onclick="markWriting1()">Submit Writing 1</button>
+    </div>
+  </div>
+
+  <!-- WRITING 2 -->
+  <div class="section-panel" id="sec4">
+    <div class="section-badge">Writing Exercise 2 · Argumentative Writing</div>
+    <div class="exercise-card">
+      <div class="exercise-number">Exercise 5</div>
+      <div class="marks-tag">[20 marks]</div>
+      <div class="passage-box" style="border-left-color:var(--blue-ink);">
+        <strong style="font-style:normal;color:var(--ink);">Task:</strong> Write an article for a school magazine arguing either for or against the following statement: <em>"Social media does more harm than good for young people."</em> Present a clear argument supported by reasoning and evidence.
+      </div>
+      <div style="font-size:13px;color:var(--ink3);margin-bottom:14px;">Aim for 350–450 words. Focus on: clear argument, rhetorical devices, structure, and persuasive vocabulary.</div>
+      <textarea class="answer-textarea" id="w2" style="min-height:220px;" placeholder="Write your article here..."></textarea>
+      <div id="wordcount3" style="font-size:12px;color:var(--ink3);margin-top:6px;">Word count: 0</div>
+
+      <div class="question-text" style="margin-top:20px;">Which persuasive techniques have you included?</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;" id="w2-techniques">
+        <div class="mcq-option" style="padding:8px 14px;" onclick="toggleTech(this)"><div class="option-text" style="padding:0;">Rhetorical question</div></div>
+        <div class="mcq-option" style="padding:8px 14px;" onclick="toggleTech(this)"><div class="option-text" style="padding:0;">Tricolon / rule of three</div></div>
+        <div class="mcq-option" style="padding:8px 14px;" onclick="toggleTech(this)"><div class="option-text" style="padding:0;">Counter-argument addressed</div></div>
+        <div class="mcq-option" style="padding:8px 14px;" onclick="toggleTech(this)"><div class="option-text" style="padding:0;">Statistics or evidence cited</div></div>
+        <div class="mcq-option" style="padding:8px 14px;" onclick="toggleTech(this)"><div class="option-text" style="padding:0;">Emotive language</div></div>
+        <div class="mcq-option" style="padding:8px 14px;" onclick="toggleTech(this)"><div class="option-text" style="padding:0;">Direct address to reader</div></div>
+      </div>
+
+      <div class="feedback-inline" id="fb-w2"></div>
+      <button class="submit-btn" onclick="markWriting2()">Submit Writing 2</button>
+    </div>
+  </div>
+
+  <!-- WRITING 3 -->
+  <div class="section-panel" id="sec5">
+    <div class="section-badge">Writing Exercise 3 · Narrative / Letter Writing</div>
+    <div class="exercise-card">
+      <div class="exercise-number">Exercise 6</div>
+      <div class="marks-tag">[20 marks]</div>
+      <div class="passage-box" style="border-left-color:var(--blue-ink);">
+        <strong style="font-style:normal;color:var(--ink);">Choose ONE task:</strong><br><br>
+        <strong style="font-style:normal;">Option A — Narrative:</strong> Write a short story that begins with the line: <em>"Nobody had warned her that the door at the end of the corridor was not meant to be opened."</em><br><br>
+        <strong style="font-style:normal;">Option B — Letter:</strong> Write a formal letter to your local council arguing for the preservation of a green space in your area that is under threat of development.
+      </div>
+      <div style="font-size:13px;color:var(--ink3);margin-bottom:14px;">Aim for 350–450 words. Focus on form-specific conventions (narrative voice / formal letter layout), structure, and engaging language.</div>
+      <textarea class="answer-textarea" id="w3" style="min-height:220px;" placeholder="Write your response here..."></textarea>
+      <div id="wordcount4" style="font-size:12px;color:var(--ink3);margin-top:6px;">Word count: 0</div>
+
+      <div class="question-text" style="margin-top:20px;">Which task did you choose?</div>
+      <div class="mcq-options" id="mcq-w3task" style="flex-direction:row;gap:10px;">
+        <div class="mcq-option" onclick="selectMCQ('w3task','A',this)" style="flex:1;"><div class="option-letter">A</div><div class="option-text" style="padding:0;">Narrative writing</div></div>
+        <div class="mcq-option" onclick="selectMCQ('w3task','B',this)" style="flex:1;"><div class="option-letter">B</div><div class="option-text" style="padding:0;">Formal letter</div></div>
+      </div>
+
+      <div class="feedback-inline" id="fb-w3"></div>
+      <button class="submit-btn" onclick="markWriting3()">Submit Writing 3</button>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div class="section-panel" id="sec6">
+    <div class="final-report show" id="final-report">
+      <div class="report-title">Practice Results</div>
+      <div class="report-sub" id="report-sub">Complete all exercises to see your full report.</div>
+      <div class="score-grid">
+        <div class="score-cell highlight">
+          <div class="num" id="rpt-total">—</div>
+          <div class="lbl">Total score</div>
+        </div>
+        <div class="score-cell">
+          <div class="num" id="rpt-reading">—</div>
+          <div class="lbl">Reading</div>
+        </div>
+        <div class="score-cell">
+          <div class="num" id="rpt-writing">—</div>
+          <div class="lbl">Writing</div>
+        </div>
+      </div>
+      <div style="font-family:'Playfair Display',serif;font-size:17px;color:var(--ink);margin-bottom:14px;">Feedback &amp; Areas to Improve</div>
+      <ul class="tip-list" id="tips-list">
+        <li><div class="tip-dot">i</div><div>Complete exercises to receive personalised feedback.</div></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="bottom-bar">
+    <button class="action-btn danger" onclick="resetAll()">Reset all</button>
+    <button class="action-btn" onclick="showResults()">View results</button>
+    <div style="margin-left:auto;font-size:12px;color:var(--ink3);" id="submitted-count">0 of 6 submitted</div>
+  </div>
+</div>
+
+<script>
+let totalSeconds = 5400;
+let timerInterval;
+let scores = { r1:null, r2:null, r3:null, w1:null, w2:null, w3:null };
+let mcqAnswers = {};
+let checkAnswers = {};
+let submitted = 0;
+
+function pad(n){ return String(n).padStart(2,'0'); }
+
+function startTimer(){
+  timerInterval = setInterval(()=>{
+    totalSeconds--;
+    const h = Math.floor(totalSeconds/3600);
+    const m = Math.floor((totalSeconds%3600)/60);
+    const s = totalSeconds%60;
+    const el = document.getElementById('timer-display');
+    el.textContent = h+':'+pad(m)+':'+pad(s);
+    el.className = 'timer-value' + (totalSeconds < 600 ? ' danger' : totalSeconds < 1800 ? ' warning' : '');
+    if(totalSeconds<=0){ clearInterval(timerInterval); el.textContent='0:00:00'; }
+  },1000);
+}
+
+function showSection(idx, btn){
+  document.querySelectorAll('.section-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('sec'+idx).classList.add('active');
+  btn.classList.add('active');
+}
+
+function showFeedback(id, type, title, body){
+  const el = document.getElementById('fb-'+id);
+  el.className = 'feedback-inline show '+type;
+  el.innerHTML = '<div class="fb-title">'+title+'</div>'+body;
+}
+
+function selectMCQ(name, val, el){
+  document.querySelectorAll('#mcq-'+name+' .mcq-option').forEach(o=>o.classList.remove('selected'));
+  el.classList.add('selected');
+  mcqAnswers[name] = val;
+}
+
+function toggleCheck(name, val, el){
+  if(!checkAnswers[name]) checkAnswers[name]=[];
+  const idx = checkAnswers[name].indexOf(val);
+  if(idx>-1){ checkAnswers[name].splice(idx,1); el.classList.remove('selected'); }
+  else { checkAnswers[name].push(val); el.classList.add('selected'); }
+}
+
+function toggleTech(el){ el.classList.toggle('selected'); }
+function toggleHint(id){ document.getElementById(id).classList.toggle('show'); }
+
+function countWords(str){ return str.trim().split(/\s+/).filter(w=>w.length>0).length; }
+
+document.getElementById('r3q1').addEventListener('input',function(){ document.getElementById('wordcount1').textContent='Word count: '+countWords(this.value); });
+document.getElementById('w1').addEventListener('input',function(){ document.getElementById('wordcount2').textContent='Word count: '+countWords(this.value); });
+document.getElementById('w2').addEventListener('input',function(){ document.getElementById('wordcount3').textContent='Word count: '+countWords(this.value); });
+document.getElementById('w3').addEventListener('input',function(){ document.getElementById('wordcount4').textContent='Word count: '+countWords(this.value); });
+
+function checkAnswerLength(id, min){ return document.getElementById(id).value.trim().length >= min; }
+
+function markReading1(){
+  let pts = 0;
+  if(checkAnswerLength('r1q1',40)){ pts+=2; showFeedback('r1q1','correct','Good [2/2]','Strong answers identify (1) the weight of many books bending the wood, and (2) a sense of warm, well-used character — "pleasantly" connotes comfort rather than damage.'); }
+  else { showFeedback('r1q1','partial','Needs development [1/2]','Try to give two separate, explained points. Remember to address both the physical cause and its connotation.'); pts+=1; }
+  if(checkAnswerLength('r1q2',80)){ pts+=4; showFeedback('r1q2','correct','Well developed [4/4]','Good. High-scoring answers explore the contrast between each business that was replaced (bakery→coffee chain; cinema→car park) and discuss what this implies about commercialisation or decline of community.'); }
+  else if(checkAnswerLength('r1q2',30)){ pts+=2; showFeedback('r1q2','partial','Partially developed [2/4]','You have identified contrast but not fully explored its effect. Aim to discuss at least two examples and explain what each contrast implies.'); }
+  else { pts+=0; showFeedback('r1q2','incorrect','Underdeveloped [0/4]','Identify specific pairs of contrasting details and explain their effect on the reader.'); }
+  if(checkAnswerLength('r1q3',80)){ pts+=4; showFeedback('r1q3','correct','Strong analysis [4/4]','Excellent. Key inferences: folding carefully = controlled/methodical; placing it under desk = suppressing/dismissing the threat; "planning the resistance" = determined, resourceful character.'); }
+  else if(checkAnswerLength('r1q3',30)){ pts+=2; showFeedback('r1q3','partial','Needs more [2/4]','Develop your inference — not just what she does but what it shows about her personality. Use the word "suggests" or "implies" to frame your analysis.'); }
+  else { pts+=0; showFeedback('r1q3','incorrect','Underdeveloped [0/4]','Refer to at least two specific details and make clear inferences from each.'); }
+  const mcq = mcqAnswers['r1q4'];
+  document.querySelectorAll('#mcq-r1q4 .mcq-option').forEach((o,i)=>{ const l=['A','B','C','D'][i]; if(l==='B') o.classList.add('correct'); else if(l===mcq && l!=='B') o.classList.add('wrong'); });
+  if(mcq==='B'){ pts+=1; showFeedback('r1q4','correct','Correct [1/1]','B is correct. "Planning the resistance" directly signals determination and defiance.'); }
+  else if(mcq){ showFeedback('r1q4','incorrect','Incorrect [0/1]','The correct answer is B. The phrase "began planning the resistance" signals active, determined opposition — not despair, indifference, or confusion.'); }
+  else { showFeedback('r1q4','incorrect','Not answered [0/1]','Select an answer. The correct answer is B.'); }
+  scores.r1 = pts; submitted++; updateProgress(); updateLiveScore();
+  document.getElementById('tab0').classList.add('done');
+}
+
+function markReading2(){
+  let pts = 0;
+  if(checkAnswerLength('r2q1',40)){ pts+=2; showFeedback('r2q1','correct','Good [2/2]','High-altitude conditions (low oxygen, physical exhaustion) impair logical decision-making — climbers cannot process risk clearly and become compelled by impulse or desire.'); }
+  else { pts+=1; showFeedback('r2q1','partial','Develop further [1/2]','Explain the cause (altitude/lack of oxygen) and the effect (impaired judgment/inability to think logically).'); }
+  const mcq2 = mcqAnswers['r2q2'];
+  document.querySelectorAll('#mcq-r2q2 .mcq-option').forEach((o,i)=>{ const l=['A','B','C','D'][i]; if(l==='A') o.classList.add('correct'); else if(l===mcq2 && l!=='A') o.classList.add('wrong'); });
+  if(mcq2==='A'){ pts+=2; showFeedback('r2q2','correct','Correct [2/2]','A is correct. The juxtaposition of mundane city traffic language with a deadly mountainside creates irony and makes the absurdity of overcrowding vivid.'); }
+  else if(mcq2){ showFeedback('r2q2','incorrect','Incorrect [0/2]','The correct answer is A. The phrase uses an everyday metaphor to make a lethal situation seem bizarrely ordinary.'); pts+=0; }
+  else { showFeedback('r2q2','incorrect','Not answered [0/2]','Select an answer. The correct answer is A.'); }
+  if(checkAnswerLength('r2q3',90)){ pts+=4; showFeedback('r2q3','correct','Strong analysis [4/4]','Good. Strong responses discuss: the contrast between corporate sponsorship and technical skill (implying money has replaced merit), the burden on Sherpa guides, and the sarcastic tone of "traffic jams" and "death zone routes".'); }
+  else if(checkAnswerLength('r2q3',40)){ pts+=2; showFeedback('r2q3','partial','Partially developed [2/4]','Identify at least two specific methods (word choice, irony, contrast) and explain the effect of each.'); }
+  else { showFeedback('r2q3','incorrect','Underdeveloped [0/4]','Discuss at least two techniques and link each to a specific quotation.'); }
+  if(checkAnswerLength('r2q4',80)){ pts+=4; showFeedback('r2q4','correct','Excellent [4/4]','Top answers discuss: the irony of risking life for a photograph; "it seems" — introducing doubt/sarcasm; the comparison that deflates the achievement; and the broader cultural commentary on social media/vanity.'); }
+  else if(checkAnswerLength('r2q4',40)){ pts+=2; showFeedback('r2q4','partial','Partially developed [2/4]','Explore the irony more fully and consider what "it seems" adds to the effect.'); }
+  else { showFeedback('r2q4','incorrect','Underdeveloped [0/4]','Unpack the final sentence: what is being compared? What is ironic? What does this say about people\'s motives?'); }
+  scores.r2 = pts; submitted++; updateProgress(); updateLiveScore();
+  document.getElementById('tab1').classList.add('done');
+}
+
+function markReading3(){
+  let pts = 0;
+  const wc = countWords(document.getElementById('r3q1').value);
+  if(checkAnswerLength('r3q1',80) && wc>=70 && wc<=120){ pts+=5; showFeedback('r3q1','correct','Strong summary [5/5]','Good length and relevant focus on environmental content (carbon emissions, water use, microplastics). High-scoring summaries paraphrase — they do not copy phrases directly from the passage.'); }
+  else if(checkAnswerLength('r3q1',50)){ pts+=3; showFeedback('r3q1','partial','Good attempt [3/5]','Check word count (80–100 target). Ensure you are using your own words, focusing only on environmental problems (not worker conditions), and selecting the key points rather than listing everything.'); }
+  else { pts+=1; showFeedback('r3q1','incorrect','Needs more development [1/5]','Write a full paragraph (80–100 words) that identifies and paraphrases the main environmental problems: carbon emissions, water consumption, and microplastic pollution.'); }
+  const sel = checkAnswers['r3q2'] || [];
+  const correct = sel.includes('A') && sel.includes('B') && sel.length===2;
+  const partial3 = (sel.includes('A') || sel.includes('B')) && sel.length<=2;
+  document.getElementById('r3q2A').classList[sel.includes('A')?'add':'remove']('selected');
+  document.getElementById('r3q2B').classList[sel.includes('B')?'add':'remove']('selected');
+  if(correct){ pts+=2; showFeedback('r3q2','correct','Correct [2/2]','A and B are both supported by the text. C (government bans) and D (cotton requires little water) are contradicted by the passage.'); }
+  else if(partial3){ pts+=1; showFeedback('r3q2','partial','Partially correct [1/2]','A and B are both correct. Review: C is not mentioned; D contradicts the passage (2,700 litres is a vast amount).'); }
+  else { showFeedback('r3q2','incorrect','Incorrect [0/2]','The correct answers are A and B. Select exactly two.'); }
+  if(checkAnswerLength('r3q3',60)){ pts+=3; showFeedback('r3q3','correct','Good [3/3]','Strong answers explain "subsistence level" means the minimum needed to survive, then infer: workers cannot afford basic needs; they are economically exploited; the phrase implies wages are deliberately kept at a minimum by employers.'); }
+  else if(checkAnswerLength('r3q3',25)){ pts+=2; showFeedback('r3q3','partial','Develop further [2/3]','Good start. Extend your answer by explaining what "subsistence" means and making a further inference about the workers\' circumstances.'); }
+  else { showFeedback('r3q3','incorrect','Needs development [0/3]','Explain the meaning of "subsistence" and what this implies about the workers\' quality of life and the conditions they face.'); }
+  scores.r3 = pts; submitted++; updateProgress(); updateLiveScore();
+  document.getElementById('tab2').classList.add('done');
+}
+
+function assessWriting(textId, minWords){
+  const text = document.getElementById(textId).value.trim();
+  const wc = countWords(text);
+  const techEls = document.querySelectorAll('#'+textId.replace('w','w')+'-techniques .mcq-option.selected');
+  const techCount = document.querySelectorAll('[id^="w'+textId.slice(1)+'"] .mcq-option.selected').length;
+  let pts = 0;
+  if(wc >= minWords){ pts += 8; }
+  else if(wc >= minWords*0.6){ pts += 5; }
+  else if(wc >= 50){ pts += 2; }
+  if(techCount >= 4) pts += 6;
+  else if(techCount >= 2) pts += 4;
+  else if(techCount >= 1) pts += 2;
+  pts = Math.min(pts, 20);
+  return { pts, wc, techCount };
+}
+
+function markWriting1(){
+  const { pts, wc, techCount } = assessWriting('w1', 300);
+  scores.w1 = pts;
+  let fb, type;
+  if(pts >= 16){ type='correct'; fb='Excellent descriptive writing. To maximise marks further: vary your sentence openings, use a mix of short and long sentences for rhythm, and ensure every detail contributes to a single, coherent atmosphere.'; }
+  else if(pts >= 10){ type='partial'; fb='Good attempt. Check word count (aim for 350–450 words). Try to include more varied techniques — particularly sensory detail across multiple senses (sound, smell, texture) and figurative language tied to the specific setting.'; }
+  else { type='incorrect'; fb='Develop your response to at least 300 words. Plan before writing: choose a clear setting, decide on its past and present state, then describe the contrast through specific, vivid details.'; }
+  showFeedback('w1', type, 'Writing 1 — '+pts+'/20', fb);
+  submitted++; updateProgress(); updateLiveScore();
+  document.getElementById('tab3').classList.add('done');
+}
+
+function markWriting2(){
+  const { pts, wc, techCount } = assessWriting('w2', 300);
+  scores.w2 = pts;
+  let fb, type;
+  if(pts >= 16){ type='correct'; fb='Strong argumentative writing. For top marks: ensure you have addressed a counter-argument and dismissed it, used a range of rhetorical devices deliberately, and maintained a consistent and appropriate tone throughout.'; }
+  else if(pts >= 10){ type='partial'; fb='Good foundation. Improve by: adding a counter-argument paragraph ("Some argue that..."), using more rhetorical questions to engage your reader, and ensuring your conclusion returns to your key argument powerfully.'; }
+  else { type='incorrect'; fb='Structure your article: introduction (state your position) → 3 body paragraphs (one argument each) → conclusion. Remember to write for a school magazine audience — formal but engaging.'; }
+  showFeedback('w2', type, 'Writing 2 — '+pts+'/20', fb);
+  submitted++; updateProgress(); updateLiveScore();
+  document.getElementById('tab4').classList.add('done');
+}
+
+function markWriting3(){
+  const { pts, wc } = assessWriting('w3', 300);
+  const task = mcqAnswers['w3task'];
+  scores.w3 = pts;
+  let specific = '';
+  if(task==='A') specific = 'For narrative writing: build tension through pacing, use varied dialogue, and ensure your ending provides resolution or a deliberate twist.';
+  else if(task==='B') specific = 'For a formal letter: include full address and date, formal salutation/valediction (Dear Sir/Madam → Yours faithfully), a clear argument with evidence, and a call to action.';
+  else specific = 'Make sure you selected your task (A or B) so your writing can be assessed against the correct form criteria.';
+  let fb, type;
+  if(pts >= 16){ type='correct'; fb='Strong response. '+specific; }
+  else if(pts >= 10){ type='partial'; fb='Good attempt. '+specific; }
+  else { type='incorrect'; fb='Develop your response to at least 300 words. '+specific; }
+  showFeedback('w3', type, 'Writing 3 — '+pts+'/20', fb);
+  submitted++; updateProgress(); updateLiveScore();
+  document.getElementById('tab5').classList.add('done');
+}
+
+function updateProgress(){
+  const done = Object.values(scores).filter(v=>v!==null).length;
+  document.getElementById('prog-bar').style.width = (done/6*100)+'%';
+  document.getElementById('prog-label').textContent = done+' of 6 completed';
+  document.getElementById('submitted-count').textContent = done+' of 6 submitted';
+}
+
+function updateLiveScore(){
+  const vals = Object.values(scores).filter(v=>v!==null);
+  const total = vals.reduce((a,b)=>a+b,0);
+  const maxPossible = (scores.r1!==null?15:0)+(scores.r2!==null?12:0)+(scores.r3!==null?10:0)+(scores.w1!==null?20:0)+(scores.w2!==null?20:0)+(scores.w3!==null?20:0);
+  document.getElementById('live-score').textContent = total+' / '+maxPossible;
+}
+
+function showResults(){
+  showSection(6, document.getElementById('tab6'));
+  generateReport();
+}
+
+function generateReport(){
+  const rVals = [scores.r1, scores.r2, scores.r3].filter(v=>v!==null);
+  const wVals = [scores.w1, scores.w2, scores.w3].filter(v=>v!==null);
+  const rTotal = rVals.reduce((a,b)=>a+b,0);
+  const wTotal = wVals.reduce((a,b)=>a+b,0);
+  const total = rTotal+wTotal;
+  const rMax = (scores.r1!==null?15:0)+(scores.r2!==null?12:0)+(scores.r3!==null?10:0);
+  const wMax = (scores.w1!==null?20:0)+(scores.w2!==null?20:0)+(scores.w3!==null?20:0);
+  const tMax = rMax+wMax;
+
+  document.getElementById('rpt-total').textContent = tMax>0 ? total+'/'+tMax : '—';
+  document.getElementById('rpt-reading').textContent = rMax>0 ? rTotal+'/'+rMax : '—';
+  document.getElementById('rpt-writing').textContent = wMax>0 ? wTotal+'/'+wMax : '—';
+
+  const pct = tMax>0 ? Math.round(total/tMax*100) : 0;
+  let grade='', sub='';
+  if(pct>=90){ grade='A* equivalent'; sub='Outstanding performance — you are well prepared for IGCSE examination.'; }
+  else if(pct>=75){ grade='A equivalent'; sub='Strong performance with minor areas to refine.'; }
+  else if(pct>=60){ grade='B equivalent'; sub='Solid foundation — targeted revision will improve your mark significantly.'; }
+  else if(pct>=45){ grade='C equivalent'; sub='Passing level, but consistent practice is needed across all skills.'; }
+  else { grade='Below C'; sub='Prioritise regular timed practice and focus on the feedback tips below.'; }
+  document.getElementById('report-sub').textContent = tMax>0 ? grade+' ('+pct+'%) — '+sub : 'Complete exercises to see your report.';
+
+  const tips = [];
+  if(scores.r1 !== null && scores.r1 < 11) tips.push({n:1, t:'Language analysis (Reading 1)', d:'Practice identifying techniques and explaining their effect. Use the structure: "The writer uses [technique]. This suggests... which makes the reader feel..." '});
+  if(scores.r2 !== null && scores.r2 < 9) tips.push({n:2, t:'Inference and writer\'s craft (Reading 2)', d:'When analysing language, always link technique → effect → reader impact. Avoid simply identifying a device without explaining why the writer chose it.'});
+  if(scores.r3 !== null && scores.r3 < 7) tips.push({n:3, t:'Summary writing (Reading 3)', d:'Re-read the passage and underline only the points that answer the question. Paraphrase each point in your own words — never copy. Aim for 80–100 words precisely.'});
+  if(scores.w1 !== null && scores.w1 < 15) tips.push({n:4, t:'Descriptive writing', d:'Plan for 5 minutes before writing. Structure: opening image → build atmosphere → shift in tone or time → closing image that echoes the opening. Use all five senses.'});
+  if(scores.w2 !== null && scores.w2 < 15) tips.push({n:5, t:'Argumentative/persuasive writing', d:'Every paragraph needs: a clear point, development with evidence or example, a counter-argument acknowledged, and a link back to your thesis. Vary your sentence length for rhetorical effect.'});
+  if(scores.w3 !== null && scores.w3 < 15) tips.push({n:6, t:'Narrative & formal writing', d:'For narrative: vary pacing — slow down for key moments, speed up for tension. For formal letter: every paragraph should advance one argument, not repeat the same point.'});
+  if(tips.length===0 && tMax>0) tips.push({n:1, t:'Excellent work!', d:'Continue timed practice under exam conditions. Review Cambridge mark schemes to understand what distinguishes a Level 3 from a Level 4 response.'});
+  if(tMax===0) { return; }
+
+  const ul = document.getElementById('tips-list');
+  ul.innerHTML = tips.map(t=>`<li><div class="tip-dot">${t.n}</div><div><strong style="font-weight:500;">${t.t}:</strong> ${t.d}</div></li>`).join('');
+}
+
+function resetAll(){
+  if(!confirm('Reset all answers and restart the timer?')) return;
+  ['r1q1','r1q2','r1q3','r2q1','r2q3','r2q4','r3q1','r3q3','w1','w2','w3'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  ['wordcount1','wordcount2','wordcount3','wordcount4'].forEach(id=>{ const el=document.getElementById(id); if(el) el.textContent='Word count: 0'; });
+  document.querySelectorAll('.mcq-option').forEach(o=>o.classList.remove('selected','correct','wrong'));
+  document.querySelectorAll('.feedback-inline').forEach(f=>{ f.className='feedback-inline'; f.innerHTML=''; });
+  document.querySelectorAll('.hint-box').forEach(h=>h.classList.remove('show'));
+  scores = {r1:null,r2:null,r3:null,w1:null,w2:null,w3:null};
+  mcqAnswers = {}; checkAnswers = {}; submitted = 0;
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('done'));
+  updateProgress(); updateLiveScore();
+  clearInterval(timerInterval);
+  totalSeconds = 5400;
+  document.getElementById('timer-display').textContent = '1:30:00';
+  document.getElementById('timer-display').className = 'timer-value';
+  showSection(0, document.getElementById('tab0'));
+  startTimer();
+}
+
+startTimer();
+</script>
